@@ -5,10 +5,9 @@ from parsing_sentences import parsing_sentences
 from collections import OrderedDict
 
 #function for printing data for debugging purposes and for storing the results to dictionaries
-def update_data(event, key_begin, key_end, dicts, labels, s,p, l, t):
+def update_data(event, key_begin, key_end, dicts, labels, s, p, l, t):
     for row in range(key_begin,key_end+1):
         print('For {0}: {1} in the paragraph {2} in the sentence {3}'.format(event, lemmas[row], paragraphs[row],sentences[row]))
-    #dicts[event].append({biographies[row]:{paragraphs[row]:sentences[row]}})
     if labels[sentences[row]] == [None]:
         labels.update({sentences[row]:[event]})
         s.append(sentences[row])
@@ -24,8 +23,6 @@ def remove_none(dicts):
         if dicts[key] == [None]:
             del clean_dict[key]
     return clean_dict
-
-#add iteration over files in folder
 
 errors = []
 directory = "Z:/Documents/event extraction/all_biographies/"
@@ -46,7 +43,7 @@ for filename in os.listdir(directory):
 
     df.head()
 
-    parsing_sentences(df, errors, name)
+    parsing_sentences(df, name, lemma=True)
 
     data = df.to_dict()
     try:
@@ -79,15 +76,10 @@ for filename in os.listdir(directory):
                                     while sentences[key_begin] == sentences[key_end]:
                                         k = list(j[1].keys())[0]
                                         v = list(j[1].values())[0]
-                                        print(k)
-                                        print(type(v))
-                                        print(type(str(features[key_end])))
 
                                         #finding the end of the structure
                                         #true if v is an empty string in case there are no particular morphological features
                                         if lemmas[key_end] == k and v in str(features[key_end]):
-                                            #print(lemmas[key_end])
-                                            #print(key_end)
                                             update_data(event, key_begin, key_end, dicts, labels,s, p , l, t)
                                             break
                                         else:
@@ -100,8 +92,6 @@ for filename in os.listdir(directory):
                                     try:
                                         while sentences[key_begin] == sentences[key_end]:
                                             if j[1] in str(features[key_end]):
-                                                #print(key_end)
-                                                #print('only morphology')
                                                 update_data(event, key_begin, key_end, dicts, labels, s, p, l, t)
                                                 break
                                             else:
@@ -110,8 +100,6 @@ for filename in os.listdir(directory):
                                         continue
                                 else:
                                     if lemmas[key_end] == j[1]:
-                                        #print(key_end)
-                                        #print('no morphology')
                                         update_data(event, key_begin, key_end, dicts, labels,s, p, l, t)
                                         break
                                     else:
@@ -179,7 +167,7 @@ for filename in os.listdir(directory):
                 new_labels.append((k, final_labels[k]))
 
         try:
-            df_results = pd.DataFrame({'Sentence':s, "Sentence_Text": t, 'Paragraph': p, 'Label':l})
+            df_results = pd.DataFrame({'Sentence': s, "Sentence_Text": t, 'Paragraph': p, 'Label': l})
         except ValueError:
             errors.append(name)
             print(errors)
